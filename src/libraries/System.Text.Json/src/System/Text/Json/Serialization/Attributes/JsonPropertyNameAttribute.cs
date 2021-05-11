@@ -5,7 +5,7 @@ namespace System.Text.Json.Serialization
 {
     /// <summary>
     /// Specifies the property name that is present in the JSON when serializing and deserializing.
-    /// This overrides any naming policy specified by <see cref="JsonNamingPolicy"/>.
+    /// This overrides any naming policy specified by <see cref="JsonKnownNamingPolicy"/>.
     /// </summary>
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false)]
     public sealed class JsonPropertyNameAttribute : JsonAttribute

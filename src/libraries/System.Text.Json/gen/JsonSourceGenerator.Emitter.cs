@@ -65,11 +65,11 @@ namespace System.Text.Json.SourceGeneration
             /// </summary>
             private readonly Dictionary<string, TypeMetadata> _rootSerializableTypes = null!;
 
-            public Emitter(in GeneratorExecutionContext executionContext, Dictionary<string, TypeMetadata> rootSerializableTypes)
+            public Emitter(in GeneratorExecutionContext executionContext, GenerationSpecification specification)
             {
                 _executionContext = executionContext;
                 _generationNamespace = $"{executionContext.Compilation.AssemblyName}.JsonSourceGeneration";
-                _rootSerializableTypes = rootSerializableTypes;
+                _rootSerializableTypes = specification.RootSerializableTypes;
             }
 
             public void Emit()

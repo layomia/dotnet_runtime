@@ -47,16 +47,17 @@ namespace System.Text.Json.SourceGeneration
             }
 
             Parser parser = new(executionContext.Compilation);
-            _rootTypes = parser.GetRootSerializableTypes(receiver.CompilationUnits);
+            GenerationSpecification? specification = parser.GetGenerationSpecification(receiver.CompilationUnits);
 
-            if (_rootTypes != null)
+            if (specification != null)
             {
-                Emitter emitter = new(executionContext, _rootTypes);
+                _rootTypes = specification.Value.RootSerializableTypes;
+                Emitter emitter = new(executionContext, specification.Value);
                 emitter.Emit();
             }
         }
 
-        internal sealed class SyntaxReceiver : ISyntaxReceiver
+        private sealed class SyntaxReceiver : ISyntaxReceiver
         {
             public List<CompilationUnitSyntax>? CompilationUnits { get; private set; }
 

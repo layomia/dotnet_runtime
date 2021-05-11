@@ -731,6 +731,11 @@ namespace System.Text.Json.Serialization
     {
         public JsonIncludeAttribute() { }
     }
+    public enum JsonKnownNamingPolicy
+    {
+        Unspecified = 0,
+        BuiltInCamelCase = 1,
+    }
     [System.FlagsAttribute]
     public enum JsonNumberHandling
     {
@@ -762,6 +767,30 @@ namespace System.Text.Json.Serialization
         protected JsonSerializerContext(System.Text.Json.JsonSerializerOptions? options) { }
         public System.Text.Json.JsonSerializerOptions Options { get { throw null; } }
         public abstract System.Text.Json.Serialization.Metadata.JsonTypeInfo? GetTypeInfo(System.Type type);
+    }
+    [System.AttributeUsageAttribute(System.AttributeTargets.Assembly, AllowMultiple=false)]
+    public partial class JsonSerializerOptionsAttribute : System.Text.Json.Serialization.JsonAttribute
+    {
+        public JsonSerializerOptionsAttribute() { }
+        public System.Text.Json.Serialization.JsonIgnoreCondition DefaultIgnoreCondition { get { throw null; } set { } }
+        public bool IgnoreReadOnlyFields { get { throw null; } set { } }
+        public bool IgnoreReadOnlyProperties { get { throw null; } set { } }
+        public bool IgnoreRuntimeCustomConverters { get { throw null; } set { } }
+        public bool IncludeFields { get { throw null; } set { } }
+        public System.Text.Json.Serialization.JsonKnownNamingPolicy NamingPolicy { get { throw null; } set { } }
+        public bool WriteIndented { get { throw null; } set { } }
+    }
+    [System.FlagsAttribute]
+    public enum JsonSourceGenerationMode
+    {
+        Metadata = 0,
+        Serialization = 1,
+        SerializationWithMetadataFallback = 2,
+    }
+    [System.AttributeUsageAttribute(System.AttributeTargets.Assembly, AllowMultiple=false)]
+    public partial class JsonSourceGenerationModeAttribute : System.Text.Json.Serialization.JsonAttribute
+    {
+        public JsonSourceGenerationModeAttribute(System.Text.Json.Serialization.JsonSourceGenerationMode generationMode) { }
     }
     public sealed partial class JsonStringEnumConverter : System.Text.Json.Serialization.JsonConverterFactory
     {

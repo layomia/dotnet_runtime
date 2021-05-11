@@ -81,19 +81,23 @@ namespace System.Text.Json.SourceGeneration
                 PopulateKnownTypes();
             }
 
-            public Dictionary<string, TypeMetadata>? GetRootSerializableTypes(List<CompilationUnitSyntax> compilationUnits)
+            public GenerationSpecification? GetGenerationSpecification(List<CompilationUnitSyntax> compilationUnits)
             {
                 TypeExtensions.NullableOfTType = _metadataLoadContext.Resolve(typeof(Nullable<>));
 
-                const string JsonSerializableAttributeName = "System.Text.Json.Serialization.JsonSerializableAttribute";
-                INamedTypeSymbol jsonSerializableAttribute = _compilation.GetTypeByMetadataName(JsonSerializableAttributeName);
+                INamedTypeSymbol jsonSerializableAttribute = _compilation.GetTypeByMetadataName("System.Text.Json.Serialization.JsonSerializableAttribute");
+                INamedTypeSymbol jsonSourceGenerationModeAttribute = _compilation.GetTypeByMetadataName("System.Text.Json.Serialization.JsonSourceGenerationModeAttribute");
+                INamedTypeSymbol jsonSerializerOptionsAttribute = _compilation.GetTypeByMetadataName("System.Text.Json.Serialization.JsonSerializerOptionsAttribute");
+
+                // We don't check for null for the other attributes because they are optional when using the generator.
                 if (jsonSerializableAttribute == null)
                 {
                     return null;
                 }
 
-                // Discover serializable types indicated by JsonSerializableAttribute.
                 Dictionary<string, TypeMetadata>? rootTypes = null;
+                JsonSourceGenerationMode generationMode = default;
+                JsonSerializerOptionsAttribute? serializerOptions = null;
 
                 foreach (CompilationUnitSyntax compilationUnit in compilationUnits)
                 {
@@ -104,64 +108,137 @@ namespace System.Text.Json.SourceGeneration
                         AttributeSyntax attributeSyntax = attributeListSyntax.Attributes.First();
                         IMethodSymbol attributeSymbol = compilationSemanticModel.GetSymbolInfo(attributeSyntax).Symbol as IMethodSymbol;
 
-                        if (attributeSymbol == null || !jsonSerializableAttribute.Equals(attributeSymbol.ContainingType, SymbolEqualityComparer.Default))
-                        {
-                            // Not the right attribute.
-                            continue;
-                        }
-
-                        // Get JsonSerializableAttribute arguments.
-                        IEnumerable<SyntaxNode> attributeArguments = attributeSyntax.DescendantNodes().Where(node => node is AttributeArgumentSyntax);
-
-                        ITypeSymbol? typeSymbol = null;
-                        string? typeInfoPropertyName = null;
-
-                        int i = 0;
-                        foreach (AttributeArgumentSyntax node in attributeArguments)
-                        {
-                            if (i == 0)
-                            {
-                                TypeOfExpressionSyntax? typeNode = node.ChildNodes().Single() as TypeOfExpressionSyntax;
-                                if (typeNode != null)
-                                {
-                                    ExpressionSyntax typeNameSyntax = (ExpressionSyntax)typeNode.ChildNodes().Single();
-                                    typeSymbol = compilationSemanticModel.GetTypeInfo(typeNameSyntax).ConvertedType;
-                                }
-                            }
-                            else if (i == 1)
-                            {
-                                // Obtain the optional TypeInfoPropertyName string property on the attribute, if present.
-                                SyntaxNode? typeInfoPropertyNameNode = node.ChildNodes().ElementAtOrDefault(1);
-                                if (typeInfoPropertyNameNode != null)
-                                {
-                                    typeInfoPropertyName = typeInfoPropertyNameNode.GetFirstToken().ValueText;
-                                }
-                            }
-
-                            i++;
-                        }
-
-                        if (typeSymbol == null)
+                        if (attributeSymbol == null)
                         {
                             continue;
                         }
 
+                        INamedTypeSymbol attributeContainingTypeSymbol = attributeSymbol.ContainingType;
 
-                        Type type = new TypeWrapper(typeSymbol, _metadataLoadContext);
-                        if (type.Namespace == "<global namespace>")
+                        if (jsonSerializableAttribute.Equals(attributeContainingTypeSymbol, SymbolEqualityComparer.Default))
                         {
-                            // typeof() reference where the type's name isn't fully qualified.
-                            // The compilation is not valid and the user needs to fix their code.
-                            // The compiler will notify the user so we don't have to.
-                            return null;
-                        }
+                            TypeMetadata? metadata = GetRootSerializableType(compilationSemanticModel, attributeSyntax);
+                            if (metadata != null)
+                            {
+                                Type type = metadata.Type;
 
-                        rootTypes ??= new Dictionary<string, TypeMetadata>();
-                        rootTypes[type.FullName] = GetOrAddTypeMetadata(type, typeInfoPropertyName);
+                                rootTypes ??= new Dictionary<string, TypeMetadata>();
+                                rootTypes[type.FullName] = metadata;
+                            }
+                        }
+                        else if (jsonSourceGenerationModeAttribute?.Equals(attributeContainingTypeSymbol, SymbolEqualityComparer.Default) == true)
+                        {
+                            generationMode = GetGenerationMode(attributeSyntax);
+                        }
                     }
                 }
 
-                return rootTypes;
+                if (rootTypes == null)
+                {
+                    return null;
+                }
+
+                return new GenerationSpecification
+                {
+                    RootSerializableTypes = rootTypes,
+                    GenerationMode = generationMode,
+                    SerializerOptions = serializerOptions
+                };
+            }
+
+            private TypeMetadata? GetRootSerializableType(SemanticModel compilationSemanticModel, AttributeSyntax attributeSyntax)
+            {
+                IEnumerable<SyntaxNode> attributeArguments = attributeSyntax.DescendantNodes().Where(node => node is AttributeArgumentSyntax);
+
+                ITypeSymbol? typeSymbol = null;
+                string? typeInfoPropertyName = null;
+
+                int i = 0;
+                foreach (AttributeArgumentSyntax node in attributeArguments)
+                {
+                    if (i == 0)
+                    {
+                        TypeOfExpressionSyntax? typeNode = node.ChildNodes().Single() as TypeOfExpressionSyntax;
+                        if (typeNode != null)
+                        {
+                            ExpressionSyntax typeNameSyntax = (ExpressionSyntax)typeNode.ChildNodes().Single();
+                            typeSymbol = compilationSemanticModel.GetTypeInfo(typeNameSyntax).ConvertedType;
+                        }
+                    }
+                    else if (i == 1)
+                    {
+                        // Obtain the optional TypeInfoPropertyName string property on the attribute, if present.
+                        SyntaxNode? typeInfoPropertyNameNode = node.ChildNodes().ElementAtOrDefault(1);
+                        if (typeInfoPropertyNameNode != null)
+                        {
+                            typeInfoPropertyName = typeInfoPropertyNameNode.GetFirstToken().ValueText;
+                        }
+                    }
+
+                    i++;
+                }
+
+                if (typeSymbol == null)
+                {
+                    return null;
+                }
+
+                Type type = new TypeWrapper(typeSymbol, _metadataLoadContext);
+                if (type.Namespace == "<global namespace>")
+                {
+                    // typeof() reference where the type's name isn't fully qualified.
+                    // The compilation is not valid and the user needs to fix their code.
+                    // The compiler will notify the user so we don't have to.
+                    return null;
+                }
+
+                return GetOrAddTypeMetadata(type, typeInfoPropertyName);
+            }
+
+            private static JsonSourceGenerationMode GetGenerationMode(AttributeSyntax attributeSyntax)
+            {
+                SyntaxNode? modeArgument = attributeSyntax.DescendantNodes().Where(node => node is AttributeArgumentSyntax).FirstOrDefault();
+
+                if (modeArgument == null)
+                {
+                    return JsonSourceGenerationMode.Metadata;
+                }
+
+                var modeNode = modeArgument.ChildNodes().Single();
+                throw new NotSupportedException($"{modeNode.GetType()}");
+
+                //ITypeSymbol? typeSymbol = null;
+                //string? typeInfoPropertyName = null;
+
+                //int i = 0;
+                //foreach (AttributeArgumentSyntax node in modeArgument)
+                //{
+                //    if (i == 0)
+                //    {
+                //        TypeOfExpressionSyntax? typeNode = node.ChildNodes().Single() as TypeOfExpressionSyntax;
+                //        if (typeNode != null)
+                //        {
+                //            ExpressionSyntax typeNameSyntax = (ExpressionSyntax)typeNode.ChildNodes().Single();
+                //            typeSymbol = compilationSemanticModel.GetTypeInfo(typeNameSyntax).ConvertedType;
+                //        }
+                //    }
+                //    else if (i == 1)
+                //    {
+                //        // Obtain the optional TypeInfoPropertyName string property on the attribute, if present.
+                //        SyntaxNode? typeInfoPropertyNameNode = node.ChildNodes().ElementAtOrDefault(1);
+                //        if (typeInfoPropertyNameNode != null)
+                //        {
+                //            typeInfoPropertyName = typeInfoPropertyNameNode.GetFirstToken().ValueText;
+                //        }
+                //    }
+
+                //    i++;
+                //}
+
+                //if (typeSymbol == null)
+                //{
+                //    return null;
+                //}
             }
 
             private TypeMetadata GetOrAddTypeMetadata(Type type, string? typeInfoPropertyName = null)
