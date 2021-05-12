@@ -89,7 +89,7 @@ namespace System.Text.Json.Serialization.Metadata
         /// Returns a <see cref="JsonConverter{T}"/> instance that converts <see cref="object"/> values.
         /// </summary>
         public static JsonConverter<object?> ObjectConverter => s_objectConverter ??= new ObjectConverter();
-        private static JsonConverter<object?>? s_objectConverter;
+        internal static JsonConverter<object?>? s_objectConverter;
 
         /// <summary>
         /// Returns a <see cref="JsonConverter{T}"/> instance that converts <see cref="float"/> values.

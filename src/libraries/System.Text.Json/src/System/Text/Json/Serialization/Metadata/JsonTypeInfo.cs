@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Text.Json.Serialization.Converters;
 
 namespace System.Text.Json.Serialization.Metadata
 {
@@ -271,6 +272,9 @@ namespace System.Text.Json.Serialization.Metadata
 
                             // Set the last element to the extension property.
                             cacheArray[cache.Count] = DataExtensionProperty;
+
+                            // Initialize the object converter here so it is only rooted when needed.
+                            JsonMetadataServices.s_objectConverter ??= new ObjectConverter();
                         }
                         else
                         {
