@@ -7,17 +7,32 @@ using System.Reflection;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
 using System.Text.Json.SourceGeneration.Tests;
-using System.Text.Json.SourceGeneration.Tests.JsonSourceGeneration;
 using Xunit;
-
-[assembly: JsonSerializable(typeof(JsonSerializerSourceGeneratorTests.MyNestedClass))]
-[assembly: JsonSerializable(typeof(JsonSerializerSourceGeneratorTests.MyNestedClass.MyNestedNestedClass))]
-[assembly: JsonSerializable(typeof(object[]))]
-[assembly: JsonSerializable(typeof(string))]
-[assembly: JsonSerializable(typeof(JsonSerializerSourceGeneratorTests.ClassWithEnumAndNullable))]
 
 namespace System.Text.Json.SourceGeneration.Tests
 {
+    [JsonSerializable(typeof(Location))]
+    [JsonSerializable(typeof(RepeatedTypes.Location), TypeInfoPropertyName = "RepeatedLocation")]
+    [JsonSerializable(typeof(ActiveOrUpcomingEvent))]
+    [JsonSerializable(typeof(CampaignSummaryViewModel))]
+    [JsonSerializable(typeof(IndexViewModel))]
+    [JsonSerializable(typeof(WeatherForecastWithPOCOs))]
+    [JsonSerializable(typeof(EmptyPoco))]
+    // Ensure no errors when type of member in previously specified object graph is passed as input type to generator.
+    [JsonSerializable(typeof(HighLowTemps))]
+    [JsonSerializable(typeof(MyType))]
+    [JsonSerializable(typeof(MyType2))]
+    [JsonSerializable(typeof(MyIntermediateType))]
+    [JsonSerializable(typeof(HighLowTempsImmutable))]
+    [JsonSerializable(typeof(JsonSerializerSourceGeneratorTests.MyNestedClass))]
+    [JsonSerializable(typeof(JsonSerializerSourceGeneratorTests.MyNestedClass.MyNestedNestedClass))]
+    [JsonSerializable(typeof(object[]))]
+    [JsonSerializable(typeof(string))]
+    [JsonSerializable(typeof(JsonSerializerSourceGeneratorTests.ClassWithEnumAndNullable))]
+    internal partial class JsonContext : JsonSerializerContext
+    {
+    }
+
     public static class JsonSerializerSourceGeneratorTests
     {
         [Fact]

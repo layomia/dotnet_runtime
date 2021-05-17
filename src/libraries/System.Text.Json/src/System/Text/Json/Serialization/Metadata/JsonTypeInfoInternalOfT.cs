@@ -69,7 +69,8 @@ namespace System.Text.Json.Serialization.Metadata
         public void InitializeAsObject(
             JsonSerializerOptions options,
             Func<T>? createObjectFunc,
-            Func<JsonSerializerContext, JsonPropertyInfo[]> propInitFunc,
+            Func<JsonSerializerContext, JsonPropertyInfo[]>? propInitFunc,
+            Action<Utf8JsonWriter, T>? serializeFunc,
             JsonNumberHandling numberHandling)
         {
             Options = options;
@@ -83,6 +84,7 @@ namespace System.Text.Json.Serialization.Metadata
             PropertyInfoForTypeInfo = JsonMetadataServices.CreateJsonPropertyInfoForClassInfo(typeof(T), this, converter, options);
             NumberHandling = numberHandling;
             PropInitFunc = propInitFunc;
+            Serialize = serializeFunc;
             SetCreateObjectFunc(createObjectFunc);
         }
 

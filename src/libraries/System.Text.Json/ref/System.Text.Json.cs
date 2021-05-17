@@ -731,6 +731,11 @@ namespace System.Text.Json.Serialization
     {
         public JsonIncludeAttribute() { }
     }
+    public enum JsonKnownNamingPolicy
+    {
+        Unspecified = 0,
+        BuiltInCamelCase = 1,
+    }
     [System.FlagsAttribute]
     public enum JsonNumberHandling
     {
@@ -751,7 +756,7 @@ namespace System.Text.Json.Serialization
         public JsonPropertyNameAttribute(string name) { }
         public string Name { get { throw null; } }
     }
-    [System.AttributeUsageAttribute(System.AttributeTargets.Assembly, AllowMultiple=true)]
+    [System.AttributeUsageAttribute(System.AttributeTargets.Class, AllowMultiple=true)]
     public sealed partial class JsonSerializableAttribute : System.Text.Json.Serialization.JsonAttribute
     {
         public JsonSerializableAttribute(System.Type type) { }
@@ -762,6 +767,25 @@ namespace System.Text.Json.Serialization
         protected JsonSerializerContext(System.Text.Json.JsonSerializerOptions? options) { }
         public System.Text.Json.JsonSerializerOptions Options { get { throw null; } }
         public abstract System.Text.Json.Serialization.Metadata.JsonTypeInfo? GetTypeInfo(System.Type type);
+    }
+    [System.AttributeUsageAttribute(System.AttributeTargets.Assembly, AllowMultiple=false)]
+    public partial class JsonSerializerOptionsAttribute : System.Text.Json.Serialization.JsonAttribute
+    {
+        public JsonSerializerOptionsAttribute() { }
+        public System.Text.Json.Serialization.JsonIgnoreCondition DefaultIgnoreCondition { get { throw null; } set { } }
+        public bool IgnoreReadOnlyFields { get { throw null; } set { } }
+        public bool IgnoreReadOnlyProperties { get { throw null; } set { } }
+        public bool IgnoreRuntimeCustomConverters { get { throw null; } set { } }
+        public bool IncludeFields { get { throw null; } set { } }
+        public System.Text.Json.Serialization.JsonKnownNamingPolicy NamingPolicy { get { throw null; } set { } }
+        public bool WriteIndented { get { throw null; } set { } }
+    }
+    [System.FlagsAttribute]
+    public enum JsonSourceGenerationMode
+    {
+        MetadataAndSerialization = 0,
+        Metadata = 1,
+        Serialization = 2,
     }
     public sealed partial class JsonStringEnumConverter : System.Text.Json.Serialization.JsonConverterFactory
     {
@@ -832,7 +856,7 @@ namespace System.Text.Json.Serialization.Metadata
         public static System.Text.Json.Serialization.Metadata.JsonTypeInfo<T> CreateValueInfo<T>(System.Text.Json.JsonSerializerOptions options, System.Text.Json.Serialization.JsonConverter converter) { throw null; }
         public static System.Text.Json.Serialization.JsonConverter<T> GetEnumConverter<T>(System.Text.Json.JsonSerializerOptions options) where T : struct { throw null; }
         public static System.Text.Json.Serialization.JsonConverter<T?> GetNullableConverter<T>(System.Text.Json.Serialization.Metadata.JsonTypeInfo<T> underlyingTypeInfo) where T : struct { throw null; }
-        public static void InitializeObjectInfo<T>(System.Text.Json.Serialization.Metadata.JsonTypeInfo<T> info, System.Text.Json.JsonSerializerOptions options, System.Func<T>? createObjectFunc, System.Func<System.Text.Json.Serialization.JsonSerializerContext, System.Text.Json.Serialization.Metadata.JsonPropertyInfo[]> propInitFunc, System.Text.Json.Serialization.JsonNumberHandling numberHandling) where T : notnull { }
+        public static void InitializeObjectInfo<T>(System.Text.Json.Serialization.Metadata.JsonTypeInfo<T> info, System.Text.Json.JsonSerializerOptions options, System.Func<T>? createObjectFunc, System.Func<System.Text.Json.Serialization.JsonSerializerContext, System.Text.Json.Serialization.Metadata.JsonPropertyInfo[]>? propInitFunc, System.Action<System.Text.Json.Utf8JsonWriter, T>? serializeFunc, System.Text.Json.Serialization.JsonNumberHandling numberHandling) where T : notnull { }
     }
     public abstract partial class JsonPropertyInfo
     {
@@ -846,5 +870,6 @@ namespace System.Text.Json.Serialization.Metadata
     public abstract partial class JsonTypeInfo<T> : System.Text.Json.Serialization.Metadata.JsonTypeInfo
     {
         internal JsonTypeInfo() { }
+        public System.Action<System.Text.Json.Utf8JsonWriter, T>? Serialize { get { throw null; } }
     }
 }

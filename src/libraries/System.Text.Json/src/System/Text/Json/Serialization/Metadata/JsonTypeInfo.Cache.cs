@@ -568,8 +568,12 @@ namespace System.Text.Json.Serialization.Metadata
 
         internal void InitializeSerializePropCache()
         {
-            Debug.Assert(PropInitFunc != null);
             Debug.Assert(Options._context != null);
+
+            if (PropInitFunc == null)
+            {
+                throw new NotSupportedException($"Property metadata was not provided for type {Type}.");
+            }
 
             PropertyCacheArray = PropInitFunc(Options._context);
         }
