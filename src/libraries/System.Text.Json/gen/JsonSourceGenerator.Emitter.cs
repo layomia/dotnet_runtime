@@ -35,8 +35,9 @@ namespace System.Text.Json.SourceGeneration
             private const string ArrayTypeRef = "global::System.Array";
             private const string InvalidOperationExceptionTypeRef = "global::System.InvalidOperationException";
             private const string TypeTypeRef = "global::System.Type";
-            private const string UnsafeTypeRef = "global::System.CompilerServices.Unsafe";
+            private const string UnsafeTypeRef = "global::System.Runtime.CompilerServices.Unsafe";
             private const string NullableTypeRef = "global::System.Nullable";
+            private const string EqualityComparerTypeRef = "global::System.Collections.Generic.EqualityComparer";
             private const string IListTypeRef = "global::System.Collections.Generic.IList";
             private const string KeyValuePairTypeRef = "global::System.Collections.Generic.KeyValuePair";
             private const string ListTypeRef = "global::System.Collections.Generic.List";
@@ -279,7 +280,7 @@ namespace {_currentContext.ContextType.Namespace}
                             }}
 
                             // Allow nullable handling to forward to the underlying type's converter.
-                            converter = {JsonMetadataServicesTypeRef}.GetNullableConverter<{typeCompilableName}>(({JsonConverterTypeRef}<{typeCompilableName}>)actualConverter);
+                            converter = {JsonMetadataServicesTypeRef}.GetNullableConverter<{typeCompilableName}>(this.{typeFriendlyName});
                         }}
                         else
                         {{
@@ -598,7 +599,7 @@ private static {JsonPropertyInfoTypeRef}[] {propInitMethodName}({JsonSerializerC
 
                         JsonIgnoreCondition? ignoreCondition = memberMetadata.DefaultIgnoreCondition;
                         string ignoreConditionNamedArg = ignoreCondition.HasValue
-                            ? $"ignoreCondition: JsonIgnoreCondition.{ignoreCondition.Value}"
+                            ? $"ignoreCondition: {JsonIgnoreConditionTypeRef}.{ignoreCondition.Value}"
                             : "ignoreCondition: default";
 
                         string converterNamedArg = memberMetadata.ConverterInstantiationLogic == null
@@ -656,7 +657,7 @@ private static {JsonPropertyInfoTypeRef}[] {propInitMethodName}({JsonSerializerC
                         PropertyGenerationSpec propertySpec = properties[i];
                         TypeGenerationSpec propertyTypeSpec = propertySpec.TypeGenerationSpec;
 
-                        if (propertyTypeSpec.ClassType == ClassType.TypeUnsupportedBySourceGen)
+                        if (propertyTypeSpec.ClassType == ClassType.TypeUnsupportedBySourceGen || !propertySpec.CanUseGetter)
                         {
                             continue;
                         }
@@ -698,13 +699,13 @@ private static {JsonPropertyInfoTypeRef}[] {propInitMethodName}({JsonSerializerC
                         if (methodToCall != null)
                         {
                             serializationLogic = $@"
-        {methodToCall}({methodArgs});";
+    {methodToCall}({methodArgs});";
                         }
                         else
                         {
                             serializationLogic = $@"
-        {WriterVarName}.WritePropertyName({propName});
-        {GetSerializeLogicForNonPrimitiveType(propertyTypeSpec.TypeInfoPropertyName, propValue, propertyTypeSpec.GenerateSerializationLogic)}";
+    {WriterVarName}.WritePropertyName({propName});
+    {GetSerializeLogicForNonPrimitiveType(propertyTypeSpec.TypeInfoPropertyName, propValue, propertyTypeSpec.GenerateSerializationLogic)}";
                         }
 
                         JsonIgnoreCondition ignoreCondition = propertySpec.DefaultIgnoreCondition ?? options.DefaultIgnoreCondition;
@@ -724,14 +725,14 @@ private static {JsonPropertyInfoTypeRef}[] {propInitMethodName}({JsonSerializerC
                                 break;
                         }
 
-                        sb.Append(WrapSerializationLogicInDefaultCheckIfRequired(serializationLogic, propValue, defaultCheckType));
+                        sb.Append(WrapSerializationLogicInDefaultCheckIfRequired(serializationLogic, propValue, propertyTypeSpec.TypeRef, defaultCheckType));
                     }
                 }
 
                 // End method definition
                 sb.Append($@"
 
-        {WriterVarName}.WriteEndObject();");
+    {WriterVarName}.WriteEndObject();");
 
                 return GenerateFastPathFuncForType(serializeMethodName, typeInfoTypeRef, sb.ToString(), canBeNull);
             }
@@ -809,18 +810,28 @@ private static void {serializeMethodName}({Utf8JsonWriterTypeRef} {WriterVarName
                 Default,
             }
 
-            private string WrapSerializationLogicInDefaultCheckIfRequired(string serializationLogic, string propValue, DefaultCheckType defaultCheckType)
+            private string WrapSerializationLogicInDefaultCheckIfRequired(string serializationLogic, string propValue, string propTypeRef, DefaultCheckType defaultCheckType)
             {
-                if (defaultCheckType == DefaultCheckType.None)
+                string comparisonLogic;
+
+                switch (defaultCheckType)
                 {
-                    return serializationLogic;
+                    case DefaultCheckType.None:
+                        return serializationLogic;
+                    case DefaultCheckType.Null:
+                        comparisonLogic = $"{propValue} != null";
+                        break;
+                    case DefaultCheckType.Default:
+                        comparisonLogic = $"{EqualityComparerTypeRef}<{propTypeRef}>.Default.Equals(default, {propValue})";
+                        break;
+                    default:
+                        throw new InvalidOperationException();
                 }
 
-                string defaultLiteral = defaultCheckType == DefaultCheckType.Null ? "null" : "default";
                 return $@"
-        if ({propValue} != {defaultLiteral})
-        {{{serializationLogic}
-        }}";
+    if ({comparisonLogic})
+    {{{IndentSource(serializationLogic, numIndentations: 1)}
+    }}";
             }
 
             private string[] GetRuntimePropNames(List<PropertyGenerationSpec>? properties, JsonKnownNamingPolicy namingPolicy)

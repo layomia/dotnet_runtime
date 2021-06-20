@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
@@ -21,6 +22,17 @@ namespace System.Text.Json.Tests.Serialization
             json = await Serializer.SerializeWrapper(actual, typeof(WeatherForecastWithPOCOs), JsonContext.Default);
             actual = (WeatherForecastWithPOCOs)await Deserializer.DeserializeWrapper(json, typeof(WeatherForecastWithPOCOs), JsonContext.Default);
             VerifyWeatherForecastWithPOCOs(expected, actual);
+        }
+
+        [Fact]
+        public void WriterIsFlushedAtRootCall()
+        {
+            using MemoryStream ms = new();
+            using Utf8JsonWriter writer = new(ms);
+
+            JsonSerializer.Serialize(writer, new HighLowTemps(), JsonContext.Default.HighLowTemps);
+            Assert.Equal(18, writer.BytesCommitted);
+            Assert.Equal(0, writer.BytesPending);
         }
 
         private static WeatherForecastWithPOCOs CreateWeatherForecastWithPOCOs()
