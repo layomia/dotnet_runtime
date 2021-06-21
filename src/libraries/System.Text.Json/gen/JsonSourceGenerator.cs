@@ -42,13 +42,20 @@ namespace System.Text.Json.SourceGeneration
             }
 
             Parser parser = new(executionContext);
-            SourceGenerationSpec? spec = parser.GetGenerationSpec(receiver.ClassDeclarationSyntaxList);
-            if (spec != null)
+            try
             {
-                _rootTypes = spec.ContextGenerationSpecList[0].RootSerializableTypes;
+                SourceGenerationSpec? spec = parser.GetGenerationSpec(receiver.ClassDeclarationSyntaxList);
+                if (spec != null)
+                {
+                    _rootTypes = spec.ContextGenerationSpecList[0].RootSerializableTypes;
 
-                Emitter emitter = new(executionContext, spec);
-                emitter.Emit();
+                    Emitter emitter = new(executionContext, spec);
+                    emitter.Emit();
+                }
+            }
+            catch(ArgumentException ex)
+            {
+                string st = ex.ToString();
             }
         }
 
