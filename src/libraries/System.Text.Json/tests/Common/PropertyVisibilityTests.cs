@@ -1398,7 +1398,7 @@ namespace System.Text.Json.Serialization.Tests
             public decimal MyNumeric;
         }
 
-        private enum MyEnum
+        public enum MyEnum
         {
             Case1 = 0,
             Case2 = 1,
@@ -1445,7 +1445,7 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(json, jsonSerialized);
         }
 
-        private struct ClassWithOverrideReversed
+        public struct ClassWithOverrideReversed
         {
             // Same as ClassWithOverride except the order of the properties is different, which should cause different reflection order.
             [JsonPropertyName("EnumValue")]
@@ -1724,7 +1724,7 @@ namespace System.Text.Json.Serialization.Tests
             public int Int2 { get; set; }
         }
 
-        private class ClassWithStructProperty_IgnoreConditionNever_Ctor
+        public class ClassWithStructProperty_IgnoreConditionNever_Ctor
         {
             public int Int1 { get; set; }
             [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
@@ -1787,6 +1787,9 @@ namespace System.Text.Json.Serialization.Tests
         }
 
         [Fact]
+#if BUILDING_SOURCE_GENERATOR_TESTS
+        [ActiveIssue("https://github.com/dotnet/runtime/issues/53393")]
+#endif
         public void ClassWithComplexObjectUsingIgnoreNeverAttribute()
         {
             string json = @"{""Class"":null, ""Dictionary"":null}";
@@ -1888,14 +1891,14 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(@"{}", json);
         }
 
-        private class ClassWithReadOnlyStringProperty
+        public class ClassWithReadOnlyStringProperty
         {
             public string MyString { get; }
 
             public ClassWithReadOnlyStringProperty(string myString) => MyString = myString;
         }
 
-        private class ClassWithReadOnlyStringProperty_IgnoreNever
+        public class ClassWithReadOnlyStringProperty_IgnoreNever
         {
             [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
             public string MyString { get; }
@@ -1970,7 +1973,7 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal("{}", JsonSerializerWrapper.Serialize(obj, new JsonSerializerOptions { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault }));
         }
 
-        private class ClassWithProps
+        public class ClassWithProps
         {
             public string MyString { get; set; }
             public int MyInt { get; set; }

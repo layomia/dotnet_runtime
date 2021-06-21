@@ -239,6 +239,10 @@ namespace System.Text.Json.Serialization.Tests
         }
 
         [Fact]
+#if BUILDING_SOURCE_GENERATOR_TESTS
+        // Needs support for parameterized ctors.
+        [ActiveIssue("https://github.com/dotnet/runtime/issues/45448")]
+#endif
         public void Map_JsonSerializableProperties_ToCtorArgs()
         {
             var obj = JsonSerializerWrapper.Deserialize<PointWith_JsonSerializableProperties>(@"{""X"":1,""Y"":2}");

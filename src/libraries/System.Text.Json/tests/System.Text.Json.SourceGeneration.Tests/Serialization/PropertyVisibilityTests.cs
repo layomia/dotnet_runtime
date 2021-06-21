@@ -15,6 +15,7 @@ namespace System.Text.Json.SourceGeneration.Tests
         }
     }
 
+    [JsonSourceGenerationOptions(GenerationMode = JsonSourceGenerationMode.Metadata)]
     [JsonSerializable(typeof(PropertyVisibilityTests.ClassWithNewSlotField))]
     [JsonSerializable(typeof(PropertyVisibilityTests.ClassWithInternalField))]
     [JsonSerializable(typeof(PropertyVisibilityTests.ClassWithNewSlotDecimalField))]
@@ -55,7 +56,6 @@ namespace System.Text.Json.SourceGeneration.Tests
     [JsonSerializable(typeof(PropertyVisibilityTests.ClassWithIgnoreAttributeProperty))]
     [JsonSerializable(typeof(PropertyVisibilityTests.ClassWithIgnoredNewSlotField))]
     [JsonSerializable(typeof(PropertyVisibilityTests.MyStruct_WithNonPublicAccessors_WithTypeAttribute))]
-    [JsonSerializable(typeof(PropertyVisibilityTests.MyStruct_WithNonPublicAccessors_WithTypeAttribute))]
     [JsonSerializable(typeof(PropertyVisibilityTests.ClassWithReadOnlyFields))]
     [JsonSerializable(typeof(PropertyVisibilityTests.MyValueTypeWithBoxedPrimitive))]
     [JsonSerializable(typeof(int))]
@@ -63,6 +63,21 @@ namespace System.Text.Json.SourceGeneration.Tests
     [JsonSerializable(typeof(PropertyVisibilityTests.ClassWithPropsAndIgnoreAttributes))]
     [JsonSerializable(typeof(List<bool>))]
     [JsonSerializable(typeof(PropertyVisibilityTests.MyValueTypeWithProperties))]
+    [JsonSerializable(typeof(PropertyVisibilityTests.ClassInheritedWithPropertyPolicyConflictWhichThrows))]
+    [JsonSerializable(typeof(PropertyVisibilityTests.ClassInheritedWithPropertyFieldPolicyConflictWhichThrows))]
+    [JsonSerializable(typeof(PropertyVisibilityTests.ClassWithPropertyFieldPolicyConflictWhichThrows))]
+    [JsonSerializable(typeof(PropertyVisibilityTests.ClassWithOverrideReversed))]
+    [JsonSerializable(typeof(PropertyVisibilityTests.ClassWithReadOnlyStringProperty))]
+    [JsonSerializable(typeof(PropertyVisibilityTests.ClassWithReadOnlyStringProperty_IgnoreNever))]
+    [JsonSerializable(typeof(PropertyVisibilityTests.Class_PropertyWith_ProtectedInitOnlySetter_WithAttribute))]
+    [JsonSerializable(typeof(PropertyVisibilityTests.Class_PropertyWith_PrivateInitOnlySetter_WithAttribute))]
+    [JsonSerializable(typeof(PropertyVisibilityTests.ClassWithProps))]
+    [JsonSerializable(typeof(PropertyVisibilityTests.ClassWithStructProperty_IgnoreConditionNever))]
+    [JsonSerializable(typeof(PropertyVisibilityTests.ClassWithStructProperty_IgnoreConditionNever_Ctor))]
+    //[JsonSerializable(typeof(PropertyVisibilityTests.ClassUsingIgnoreNeverAttribute))]
+    [JsonSerializable(typeof(PropertyVisibilityTests.ClassWithPropertyFieldNamingConflictWhichThrows))]
+    //[JsonSerializable(typeof(PropertyVisibilityTests.))]
+    //[JsonSerializable(typeof(PropertyVisibilityTests.))]
     internal sealed partial class PropertyVisibilityTestsContext : JsonSerializerContext
     {
     }

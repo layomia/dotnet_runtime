@@ -6,6 +6,10 @@
     <NoWarn>$(NoWarn);SYSLIB0020</NoWarn>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <DefineConstants>$(DefineConstants);BUILDING_SOURCE_GENERATOR_TESTS</DefineConstants>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\..\gen\System.Text.Json.SourceGeneration.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
