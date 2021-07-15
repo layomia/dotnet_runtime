@@ -18,7 +18,6 @@ namespace System.Text.Json.Serialization.Tests
             string exStr = ex.ToString();
             Assert.Contains("'X'", exStr);
             Assert.Contains("'x'", exStr);
-            Assert.Contains("(Int32, Int32)", exStr);
             Assert.Contains("System.Text.Json.Serialization.Tests.Point_MultipleMembers_BindTo_OneConstructorParameter", exStr);
 
             ex = await Assert.ThrowsAsync<InvalidOperationException>(
@@ -27,7 +26,6 @@ namespace System.Text.Json.Serialization.Tests
             exStr = ex.ToString();
             Assert.Contains("'X'", exStr);
             Assert.Contains("'x'", exStr);
-            Assert.Contains("(Int32)", exStr);
             Assert.Contains("Point_MultipleMembers_BindTo_OneConstructorParameter_Variant", exStr);
 
             ex = await Assert.ThrowsAsync<InvalidOperationException>(
@@ -36,7 +34,6 @@ namespace System.Text.Json.Serialization.Tests
             exStr = ex.ToString();
             Assert.Contains("'URL'", exStr);
             Assert.Contains("'Url'", exStr);
-            Assert.Contains("(Int32)", exStr);
             Assert.Contains("Url_BindTo_OneConstructorParameter", exStr);
         }
 
@@ -47,19 +44,16 @@ namespace System.Text.Json.Serialization.Tests
                 () => Serializer.DeserializeWrapper<Point_Without_Members>("{}"));
 
             string exStr = ex.ToString();
-            Assert.Contains("(Int32, Int32)", exStr);
             Assert.Contains("System.Text.Json.Serialization.Tests.Point_Without_Members", exStr);
 
             ex = await Assert.ThrowsAsync<InvalidOperationException>(
                 () => Serializer.DeserializeWrapper<Point_With_MismatchedMembers>("{}"));
             exStr = ex.ToString();
-            Assert.Contains("(Int32, Int32)", exStr);
             Assert.Contains("System.Text.Json.Serialization.Tests.Point_With_MismatchedMembers", exStr);
 
             ex = await Assert.ThrowsAsync<InvalidOperationException>(
                 () => Serializer.DeserializeWrapper<WrapperFor_Point_With_MismatchedMembers>(@"{""MyInt"":1,""MyPoint"":{}}"));
             exStr = ex.ToString();
-            Assert.Contains("(Int32, Int32)", exStr);
             Assert.Contains("System.Text.Json.Serialization.Tests.Point_With_MismatchedMembers", exStr);
         }
 
@@ -126,7 +120,6 @@ namespace System.Text.Json.Serialization.Tests
             string exStr = ex.ToString(); // System.InvalidOperationException: 'The extension data property 'System.Collections.Generic.Dictionary`2[System.String,System.Text.Json.JsonElement] ExtensionData' on type 'System.Text.Json.Serialization.Tests.ConstructorTests+Class_ExtData_CtorParam' cannot bind with a parameter in constructor 'Void .ctor(System.Collections.Generic.Dictionary`2[System.String,System.Text.Json.JsonElement])'.'
             Assert.Contains("System.Collections.Generic.Dictionary`2[System.String,System.Text.Json.JsonElement] ExtensionData", exStr);
             Assert.Contains("System.Text.Json.Serialization.Tests.ConstructorTests+Class_ExtData_CtorParam", exStr);
-            Assert.Contains("(System.Collections.Generic.Dictionary`2[System.String,System.Text.Json.JsonElement])", exStr);
         }
 
         public class Class_ExtData_CtorParam

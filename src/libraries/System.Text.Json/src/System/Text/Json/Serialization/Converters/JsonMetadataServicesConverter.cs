@@ -44,6 +44,8 @@ namespace System.Text.Json.Serialization.Converters
 
         internal override Type? ElementType => _elementType;
 
+        internal override bool ConstructorIsParameterized => Converter.ConstructorIsParameterized;
+
         public JsonMetadataServicesConverter(Func<JsonConverter<T>> converterCreator, ConverterStrategy converterStrategy, Type? keyType, Type? elementType)
         {
             _converterCreator = converterCreator ?? throw new ArgumentNullException(nameof(converterCreator));
@@ -56,9 +58,17 @@ namespace System.Text.Json.Serialization.Converters
         {
             JsonTypeInfo jsonTypeInfo = state.Current.JsonTypeInfo;
 
-            if (_converterStrategy == ConverterStrategy.Object && jsonTypeInfo.PropertyCache == null)
+            if (_converterStrategy == ConverterStrategy.Object)
             {
-                jsonTypeInfo.InitializePropCache();
+                if (jsonTypeInfo.PropertyCache == null)
+                {
+                    jsonTypeInfo.InitializePropCache();
+                }
+
+                if (jsonTypeInfo.ParameterCache == null && jsonTypeInfo.CreateObjectWithArgs != null)
+                {
+                    jsonTypeInfo.InitializeParameterCache();
+                }
             }
 
             return Converter.OnTryRead(ref reader, typeToConvert, options, ref state, out value);

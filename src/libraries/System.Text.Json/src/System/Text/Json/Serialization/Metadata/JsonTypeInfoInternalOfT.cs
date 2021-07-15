@@ -1,6 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Collections.Generic;
 using System.Text.Json.Serialization.Converters;
 
 namespace System.Text.Json.Serialization.Metadata
@@ -20,7 +21,7 @@ namespace System.Text.Json.Serialization.Metadata
         }
 
         /// <summary>
-        /// Creates serialization metadata for an object.
+        /// Creates serialization metadata for an object that will be deserialized with a parameterless constructor.
         /// </summary>
         public JsonTypeInfoInternal(
             JsonSerializerOptions options,
@@ -32,7 +33,7 @@ namespace System.Text.Json.Serialization.Metadata
         {
             if (propInitFunc == null && serializeFunc == null)
             {
-                ThrowHelper.ThrowInvalidOperationException_PropInitAndSerializeFuncsNull();
+                ThrowHelper.ThrowInvalidOperationException_MetadatInitFuncsNull();
             }
 
 #pragma warning disable CS8714
@@ -45,7 +46,44 @@ namespace System.Text.Json.Serialization.Metadata
             NumberHandling = numberHandling;
             PropInitFunc = propInitFunc;
             Serialize = serializeFunc;
+
             SetCreateObjectFunc(createObjectFunc);
+        }
+
+        /// <summary>
+        /// Creates serialization metadata for an object that will be deserialized with a parameterized constructor.
+        /// </summary>
+        public JsonTypeInfoInternal(
+            JsonSerializerOptions options,
+            Func<object[], T>? createObjectWithArgsFunc,
+            Func<JsonSerializerContext, JsonPropertyInfo[]>? propInitFunc,
+            Func<JsonParameterClrInfo[]>? ctorParamInitFunc,
+            JsonNumberHandling numberHandling,
+            Action<Utf8JsonWriter, T>? serializeFunc
+            ) : base(typeof(T), options, ConverterStrategy.Object)
+        {
+            //if ((propInitFunc == null && serializeFunc == null) ||
+            //    (createObjectWithArgsFunc != null && ctorParamInitFunc == null))
+            //{
+            //    ThrowHelper.ThrowInvalidOperationException_MetadatInitFuncsNull();
+            //}
+
+#pragma warning disable CS8714
+            // The type cannot be used as type parameter in the generic type or method.
+            // Nullability of type argument doesn't match 'notnull' constraint.
+            JsonConverter converter = new JsonMetadataServicesConverter<T>(
+                () => new LargeObjectWithParameterizedConstructorConverter<T>(),
+                ConverterStrategy.Object,
+                keyType: null,
+                elementType: null);
+#pragma warning restore CS8714
+
+            PropertyInfoForTypeInfo = JsonMetadataServices.CreateJsonPropertyInfoForClassInfo(typeof(T), this, converter, Options);
+            NumberHandling = numberHandling;
+            PropInitFunc = propInitFunc;
+            CtorParamInitFunc = ctorParamInitFunc;
+            Serialize = serializeFunc;
+            CreateObjectWithArgs = createObjectWithArgsFunc;
         }
 
         /// <summary>

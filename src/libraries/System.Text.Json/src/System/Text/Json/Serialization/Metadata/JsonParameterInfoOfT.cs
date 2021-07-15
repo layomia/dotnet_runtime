@@ -14,30 +14,24 @@ namespace System.Text.Json.Serialization.Metadata
     {
         public T TypedDefaultValue { get; private set; } = default!;
 
-        public override void Initialize(
-            Type runtimePropertyType,
-            ParameterInfo parameterInfo,
-            JsonPropertyInfo matchingProperty,
-            JsonSerializerOptions options)
+        public override void Initialize(JsonParameterClrInfo parameterInfo, JsonPropertyInfo matchingProperty, JsonSerializerOptions options)
         {
-            base.Initialize(
-                runtimePropertyType,
-                parameterInfo,
-                matchingProperty,
-                options);
+            base.Initialize(parameterInfo, matchingProperty, options);
 
-            Debug.Assert(parameterInfo.ParameterType == matchingProperty.DeclaredPropertyType);
+            Debug.Assert(ClrInfo.ParameterType == matchingProperty.DeclaredPropertyType);
 
-            if (parameterInfo.HasDefaultValue)
+            if (ClrInfo.HasDefaultValue)
             {
-                if (parameterInfo.DefaultValue == null && !matchingProperty.PropertyTypeCanBeNull)
+                object? defaultValue = ClrInfo.DefaultValue;
+
+                if (defaultValue == null && !matchingProperty.PropertyTypeCanBeNull)
                 {
                     DefaultValue = TypedDefaultValue;
                 }
                 else
                 {
-                    DefaultValue = parameterInfo.DefaultValue;
-                    TypedDefaultValue = (T)parameterInfo.DefaultValue!;
+                    DefaultValue = defaultValue;
+                    TypedDefaultValue = (T)defaultValue!;
                 }
             }
             else

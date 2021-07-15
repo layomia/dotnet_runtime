@@ -1,6 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Collections.Generic;
 using System.Text.Json.Serialization.Converters;
 
 namespace System.Text.Json.Serialization.Metadata
@@ -157,6 +158,20 @@ namespace System.Text.Json.Serialization.Metadata
         /// <returns></returns>
         public static JsonConverter<T> GetEnumConverter<T>(JsonSerializerOptions options) where T : struct, Enum
             => new EnumConverter<T>(EnumConverterOptions.AllowNumbers, options ?? throw new ArgumentNullException(nameof(options)));
+
+        /// <summary>
+        /// Creates a <see cref="JsonConverter{T}"/> instance that converts <see cref="KeyValuePair{TKey, TValue}"/> values.
+        /// </summary>
+        /// <typeparam name="TKey">The generic definition for the key type.</typeparam>
+        /// <typeparam name="TValue">The generic definition for the key type.</typeparam>
+        /// <param name="options">The <see cref="JsonSerializerOptions"/> to use for serialization and deserialization.</param>
+        /// <returns></returns>
+        public static JsonConverter<KeyValuePair<TKey, TValue>> GetKeyValuePairConverter<TKey, TValue>(JsonSerializerOptions options)
+        {
+            JsonConverter<KeyValuePair<TKey, TValue>> converter = new KeyValuePairConverter<TKey, TValue>();
+            converter.Initialize(options ?? throw new ArgumentNullException(nameof(options)));
+            return converter;
+        }
 
         /// <summary>
         /// Creates a <see cref="JsonConverter{T}"/> instance that converts <typeparamref name="T?"/> values.

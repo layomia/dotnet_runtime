@@ -26,7 +26,7 @@ namespace System.Text.Json.Serialization
                 MethodInfo[] constructingTypeMethods = constructingType.GetMethods();
                 foreach (MethodInfo method in constructingTypeMethods)
                 {
-                    if (method.Name == ReflectionExtensions.CreateRangeMethodName &&
+                    if (method.Name == Reflection.ReflectionExtensions.CreateRangeMethodName &&
                         method.GetParameters().Length == 1 &&
                         method.IsGenericMethod &&
                         method.GetGenericArguments().Length == 1)
@@ -49,7 +49,7 @@ namespace System.Text.Json.Serialization
                 MethodInfo[] constructingTypeMethods = constructingType.GetMethods();
                 foreach (MethodInfo method in constructingTypeMethods)
                 {
-                    if (method.Name == ReflectionExtensions.CreateRangeMethodName &&
+                    if (method.Name == Reflection.ReflectionExtensions.CreateRangeMethodName &&
                         method.GetParameters().Length == 1 &&
                         method.IsGenericMethod &&
                         method.GetGenericArguments().Length == 2)

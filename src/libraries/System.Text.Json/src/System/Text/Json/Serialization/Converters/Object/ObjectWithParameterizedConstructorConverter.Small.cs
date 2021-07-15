@@ -31,7 +31,7 @@ namespace System.Text.Json.Serialization.Converters
 
             bool success;
 
-            switch (jsonParameterInfo.Position)
+            switch (jsonParameterInfo.ClrInfo.Position)
             {
                 case 0:
                     success = TryRead<TArg0>(ref state, ref reader, jsonParameterInfo, out arguments.Arg0);
@@ -94,7 +94,7 @@ namespace System.Text.Json.Serialization.Converters
 
                 if (parameterInfo.ShouldDeserialize)
                 {
-                    int position = parameterInfo.Position;
+                    int position = parameterInfo.ClrInfo.Position;
 
                     switch (position)
                     {

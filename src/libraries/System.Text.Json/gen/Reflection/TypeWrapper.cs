@@ -249,7 +249,8 @@ namespace System.Text.Json.Reflection
 
             foreach (IMethodSymbol c in _namedTypeSymbol.Constructors)
             {
-                if (c.DeclaredAccessibility == Accessibility.Public)
+                if (((BindingFlags.Public & bindingAttr) != 0 && c.DeclaredAccessibility == Accessibility.Public) ||
+                    ((BindingFlags.NonPublic & bindingAttr) != 0 && c.DeclaredAccessibility != Accessibility.Public))
                 {
                     ctors.Add(new ConstructorInfoWrapper(c, _metadataLoadContext));
                 }

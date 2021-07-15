@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 using System.Text.Json.Reflection;
 using System.Text.Json.Serialization;
 
@@ -44,6 +45,8 @@ namespace System.Text.Json.SourceGeneration
         public JsonNumberHandling? NumberHandling { get; private set; }
 
         public List<PropertyGenerationSpec>? PropertyGenSpecList { get; private set; }
+
+        public ParameterInfo[]? CtorParameterInfoArray { get; private set; }
 
         public CollectionType CollectionType { get; private set; }
 
@@ -96,6 +99,7 @@ namespace System.Text.Json.SourceGeneration
             ClassType classType,
             JsonNumberHandling? numberHandling,
             List<PropertyGenerationSpec>? propertyGenSpecList,
+            ParameterInfo[]? parameterInfoArray,
             CollectionType collectionType,
             TypeGenerationSpec? collectionKeyTypeMetadata,
             TypeGenerationSpec? collectionValueTypeMetadata,
@@ -114,6 +118,7 @@ namespace System.Text.Json.SourceGeneration
             CanBeNull = !IsValueType || nullableUnderlyingTypeMetadata != null;
             NumberHandling = numberHandling;
             PropertyGenSpecList = propertyGenSpecList;
+            CtorParameterInfoArray = parameterInfoArray;
             CollectionType = collectionType;
             CollectionKeyTypeMetadata = collectionKeyTypeMetadata;
             CollectionValueTypeMetadata = collectionValueTypeMetadata;

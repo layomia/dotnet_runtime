@@ -43,6 +43,8 @@ namespace System.Text.Json.SourceGeneration
                 Diagnostics.Debugger.Launch();
             }
 #endif
+            //try
+            //{
             SyntaxReceiver receiver = (SyntaxReceiver)executionContext.SyntaxReceiver;
             List<ClassDeclarationSyntax>? contextClasses = receiver.ClassDeclarationSyntaxList;
             if (contextClasses == null)
@@ -59,6 +61,11 @@ namespace System.Text.Json.SourceGeneration
                 Emitter emitter = new(executionContext, spec);
                 emitter.Emit();
             }
+            //}
+            //catch (Exception ex)
+            //{
+            //    string str = ex.ToString();
+            //}
         }
 
         private sealed class SyntaxReceiver : ISyntaxReceiver

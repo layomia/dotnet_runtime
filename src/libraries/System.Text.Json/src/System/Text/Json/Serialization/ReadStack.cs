@@ -337,7 +337,8 @@ namespace System.Text.Json
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void SetConstructorArgumentState()
         {
-            if (Current.JsonTypeInfo.ParameterCount > 0)
+            //JsonTypeInfo typeInfo = ;
+            if (Current.JsonTypeInfo.PropertyInfoForTypeInfo.ConverterBase.ConstructorIsParameterized)
             {
                 // A zero index indicates a new stack frame.
                 if (Current.CtorArgumentStateIndex == 0)
